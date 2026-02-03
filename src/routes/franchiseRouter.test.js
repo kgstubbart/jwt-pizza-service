@@ -5,7 +5,6 @@ const { Role, DB } = require('../database/database.js');
 
 let admin;
 let adminToken;
-let dinerToken;
 
 async function createAdminUser() {
   let user = { password: 'toomanysecrets', roles: [{ role: Role.Admin }] };
@@ -23,9 +22,6 @@ function randomName() {
 beforeAll(async () => {
     admin = await createAdminUser();
     adminToken = await setAuth(admin);
-    const diner = { name: randomName(), email: randomName() + '@diner.com', password: 'dinerpassword' };
-    const registerRes = await request(app).post('/api/auth').send(diner);
-    dinerToken = registerRes.body.token;
 });
 
 test('admin create franchise', async () => {
