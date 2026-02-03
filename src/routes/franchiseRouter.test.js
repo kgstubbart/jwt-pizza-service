@@ -65,3 +65,17 @@ test('list franchises', async () => {
     expect(Array.isArray(response.body.franchises)).toBe(true);
 });
 
+test('delete franchise', async () => {
+    const name = 'Franchise ' + randomName();
+    const franchiseResponse = await request(app)
+        .post('/api/franchise')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ name, admins: [{ email: admin.email }] });
+    expect(franchiseResponse.status).toBe(200);
+
+    const deleteResponse = await request(app)
+        .delete(`/api/franchise/${franchiseResponse.body.id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+    expect(deleteResponse.status).toBe(200);
+    expect(deleteResponse.body).toEqual({ message: 'franchise deleted' });
+});
