@@ -50,3 +50,11 @@ test('admin add menu item', async () => {
     expect(addMenuRes.status).toBe(200);
     expect(addMenuRes.body.find(item => item.title === newItem.title)).toMatchObject(newItem);
 });
+
+test('diner get orders', async () => {
+    const ordersRes = await request(app)
+        .get('/api/order')
+        .set('Authorization', `Bearer ${dinerToken}`);
+    expect(ordersRes.status).toBe(200);
+    expect(ordersRes.body).toBeDefined();
+});
