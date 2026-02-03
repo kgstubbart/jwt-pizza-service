@@ -58,3 +58,10 @@ test('admin creates a store for franchise', async () => {
     expect(storeResponse.body.name).toMatch(/Store /);
 });
 
+test('list franchises', async () => {
+    const response = await request(app)
+        .get('/api/franchise')
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body.franchises)).toBe(true);
+});
+
