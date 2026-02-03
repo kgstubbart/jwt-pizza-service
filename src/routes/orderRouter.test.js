@@ -58,3 +58,23 @@ test('diner get orders', async () => {
     expect(ordersRes.status).toBe(200);
     expect(ordersRes.body).toBeDefined();
 });
+
+test('diner create order', async () => {
+    const menu = await DB.getMenu();
+    const menuItem = menu[0];
+
+    const orderReq = {
+        franchiseId: 1,
+        storeId: 1,
+        items: [
+            { menuId: menuItem.id, description: menuItem.description, price: menuItem.price }
+        ]
+    };
+
+    const createOrderRes = await request(app)
+        .post('/api/order')
+        .set('Authorization', `Bearer ${dinerToken}`)
+        .send(orderReq);
+    expect(createOrderRes.status).toBe(200);
+    expect(createOrderRes.body.order).toBeDefined();
+});
