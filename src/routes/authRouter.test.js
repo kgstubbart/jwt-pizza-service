@@ -29,6 +29,13 @@ test('login fails with wrong password', async () => {
   expect(loginRes.status).toBe(401);
 });
 
+test('register - missing fields', async () => {
+  const registerRes = await request(app).post('/api/auth').send({
+    name: 'missingFieldsUser'
+  });
+  expect(registerRes.status).toBe(400);
+});
+
 function expectValidJwt(potentialJwt) {
   expect(potentialJwt).toMatch(/^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/);
 }
