@@ -27,3 +27,15 @@ beforeAll(async () => {
     const registerRes = await request(app).post('/api/auth').send(diner);
     dinerToken = registerRes.body.token;
 });
+
+test('admin create franchise', async () => {
+    const name = 'Franchise ' + randomName();
+    const res = await request(app)
+        .post('/api/franchise')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ name, admins: [{ email: admin.email }] });
+    
+    expect(res.status).toBe(200);
+    expect(res.body.name).toBe(name);
+    expect(Array.isArray(res.body.admins)).toBe(true);
+});
