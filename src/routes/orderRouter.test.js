@@ -40,3 +40,13 @@ test('get menu', async () => {
     expect(menuRes.status).toBe(200);
     expect(Array.isArray(menuRes.body)).toBe(true);
 });
+
+test('admin add menu item', async () => {
+    const newItem ={ title: 'Test Item ' + randomName(), description: 'A test menu item', image:'test.png', price: 2.23 };
+    const addMenuRes = await request(app)
+        .put('/api/order/menu')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(newItem);
+    expect(addMenuRes.status).toBe(200);
+    expect(addMenuRes.body.find(item => item.title === newItem.title)).toMatchObject(newItem);
+});
