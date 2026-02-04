@@ -76,6 +76,14 @@ jobs:
           echo "Searching for any version.json files:"
           find . -name "version.json" -print -maxdepth 6 -exec echo "----" \; -exec cat {} \; -exec echo "" \;
 
+      - name: Find version placeholder usage
+        run: |
+          echo "Searching for placeholder version string..."
+          grep -R --line-number "00010101.010101" src || true
+          echo ""
+          echo "Searching for version.json reads..."
+          grep -R --line-number "version.json" src || true
+
       - name: Tests
         run: npm test
 
