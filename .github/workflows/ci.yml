@@ -57,35 +57,15 @@ jobs:
             },
           };" > src/config.js
 
+      - name: Tests
+        run: npm test
+
       - name: set version
         id: set_version
         run: |
           version=$(date +'%Y%m%d.%H%M%S')
           echo "version=$version" >> "$GITHUB_OUTPUT"
           printf '{"version": "%s" }' "$version" > src/version.json
-
-      - name: Debug version files
-        run: |
-          echo "PWD: $(pwd)"
-          echo "Runner date: $(date)"
-          echo ""
-          echo "src/version.json:"
-          ls -la src || true
-          cat src/version.json || true
-          echo ""
-          echo "Searching for any version.json files:"
-          find . -name "version.json" -print -maxdepth 6 -exec echo "----" \; -exec cat {} \; -exec echo "" \;
-
-      - name: Find version placeholder usage
-        run: |
-          echo "Searching for placeholder version string..."
-          grep -R --line-number "00010101.010101" src || true
-          echo ""
-          echo "Searching for version.json reads..."
-          grep -R --line-number "version.json" src || true
-
-      - name: Tests
-        run: npm test
 
       - name: Update coverage
         run: |
