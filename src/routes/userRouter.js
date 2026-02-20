@@ -82,7 +82,20 @@ userRouter.get(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
-    res.json({ message: 'not implemented', users: [], more: false });
+    const page = Math.max(parseInt(req.query.page ?? '1', 10), 1);
+    const limit = Math.max(parseInt(req.query.limit ?? '10', 10), 1);
+    const name = req.query.name ?? '*';
+
+    const offset = (page - 1) * limit;
+
+    const nameFilter = name === '*' || name.trim() === '' ? null : name;
+
+    const users = await DB.listUsers(offset, limit + 1, nameFilter);
+
+    const hasMore = users.length > limit;
+    const usersToReturn = users.slice(0, limit);
+
+    res.json({ usersToReturn, hasMore });
   })
 );
 

@@ -40,6 +40,7 @@ test('list users returns list', async () => {
   const listUsersRes = await request(app)
     .get('/api/user?page=1&limit=10&name=*')
     .set('Authorization', 'Bearer ' + userToken);
+  console.log(listUsersRes.body);
   expect(listUsersRes.status).toBe(200);
   expect(listUsersRes.body).toHaveProperty('users');
   expect(Array.isArray(listUsersRes.body.users)).toBe(true);
