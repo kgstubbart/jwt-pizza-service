@@ -101,6 +101,22 @@ test('list users sets more=false on last page', async () => {
   expect(page2.body.more).toBe(false);
 });
 
+test('list users filters by name', async () => {
+  const service = request(app);
+  const [u, token] = await registerUser(service);
+
+  await service.post('/api/auth').send({ name: 'Kai Chen', email: `${randomName()}@t.com`, password: 'a' });
+  await service.post('/api/auth').send({ name: 'Buddy', email: `${randomName()}@t.com`, password: 'a' });
+
+  const res = await service
+    .get('/api/user?page=1&limit=10&name=Kai')
+    .set('Authorization', 'Bearer ' + token);
+
+  expect(res.status).toBe(200);
+  expect(res.body.users.length).toBeGreaterThan(0);
+  expect(res.body.users.every(u => u.name.includes('Kai'))).toBe(true);
+});
+
 async function registerUser(service) {
   const testUser = {
     name: 'pizza diner',
