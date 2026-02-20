@@ -90,9 +90,9 @@ userRouter.get(
 
     const nameFilter = name === '*' || name.trim() === '' ? null : name;
 
-    const [users, hasMore] = await DB.listUsers(page, limit, nameFilter);
+    const [users, more] = await DB.listUsers(page, limit, nameFilter);
 
-    res.json({ users, hasMore });
+    res.json({ users, more });
   })
 );
 

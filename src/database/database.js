@@ -286,7 +286,13 @@ class DB {
     try {
       const offset = this.getOffset(page, limit);
 
-      const likeFilter = (nameFilter ?? '*').toString().replace(/\*/g, '%');
+      let likeFilter = (nameFilter ?? '*').toString();
+
+      likeFilter = likeFilter.replace(/\*/g, '%');
+
+      if (!likeFilter.includes('%')) {
+        likeFilter = `%${likeFilter}%`;
+      }
 
       let users = await this.query(connection, `SELECT id, name, email FROM user WHERE name LIKE ? ORDER BY id DESC LIMIT ${limit + 1} OFFSET ${offset}`, [likeFilter]);
       const more = users.length > limit;
@@ -301,11 +307,10 @@ class DB {
     } finally {
       connection.end();
     }
-
   }
 
   getOffset(currentPage = 1, listPerPage) {
-    return (currentPage - 1) * [listPerPage];
+    return (currentPage - 1) * listPerPage;
   }
 
   getTokenSignature(token) {

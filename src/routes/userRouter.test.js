@@ -58,6 +58,49 @@ test('list users returns list', async () => {
   }
 });
 
+test('list users paginates and sets more=true when there are more results', async () => {
+  const [u, token] = await registerUser(request(app));
+  for (let i = 0; i < 12; i++) await registerUser(request(app));
+
+  const res = await request(app)
+    .get('/api/user?page=1&limit=10&name=*')
+    .set('Authorization', 'Bearer ' + token);
+
+  expect(res.status).toBe(200);
+  expect(res.body.users).toHaveLength(10);
+  expect(res.body.more).toBe(true);
+});
+
+test('list users sets more=false on last page', async () => {
+  const service = request(app);
+  const [u, token] = await registerUser(service);
+
+  const prefix = `zz-${randomName()}`;
+
+  // create exactly 7 users with that prefix
+  for (let i = 0; i < 7; i++) {
+    await service.post('/api/auth').send({
+      name: `${prefix}-${i}`,
+      email: `${randomName()}@t.com`,
+      password: 'a',
+    });
+  }
+
+  const page1 = await service
+    .get(`/api/user?page=1&limit=5&name=${prefix}`)
+    .set('Authorization', 'Bearer ' + token);
+  expect(page1.status).toBe(200);
+  expect(page1.body.users).toHaveLength(5);
+  expect(page1.body.more).toBe(true);
+
+  const page2 = await service
+    .get(`/api/user?page=2&limit=5&name=${prefix}`)
+    .set('Authorization', 'Bearer ' + token);
+  expect(page2.status).toBe(200);
+  expect(page2.body.users).toHaveLength(2);
+  expect(page2.body.more).toBe(false);
+});
+
 async function registerUser(service) {
   const testUser = {
     name: 'pizza diner',
