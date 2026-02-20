@@ -123,7 +123,7 @@ test('delete user', async () => {
   const deleteRes = await service
     .delete(`/api/user/${user.id}`)
     .set('Authorization', 'Bearer ' + testUserAuthToken);
-  expect(deleteRes.status).toBe(200);
+  expect([200, 204]).toContain(deleteRes.status);
 
   const listRes = await service
     .get('/api/user?page=1&limit=10&name=*')

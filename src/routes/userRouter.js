@@ -73,7 +73,9 @@ userRouter.delete(
   '/:userId',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
-    res.json({ message: 'not implemented' });
+    const userId = parseInt(req.params.userId, 10);
+    await DB.deleteUser(userId);
+    res.status(204).send();
   })
 );
 
