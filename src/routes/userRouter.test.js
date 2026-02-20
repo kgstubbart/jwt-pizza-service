@@ -117,6 +117,20 @@ test('list users filters by name', async () => {
   expect(res.body.users.every(u => u.name.includes('Kai'))).toBe(true);
 });
 
+test('delete user', async () => {
+  const service = request(app);
+  const [user] = await registerUser(service);
+  const deleteRes = await service
+    .delete(`/api/user/${user.id}`)
+    .set('Authorization', 'Bearer ' + testUserAuthToken);
+  expect(deleteRes.status).toBe(200);
+
+  const listRes = await service
+    .get('/api/user?page=1&limit=10&name=*')
+    .set('Authorization', 'Bearer ' + testUserAuthToken);
+  expect(listRes.body.users.some(u => u.id === user.id)).toBe(false);
+});
+
 async function registerUser(service) {
   const testUser = {
     name: 'pizza diner',
