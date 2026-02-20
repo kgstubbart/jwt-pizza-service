@@ -32,6 +32,26 @@ test('list users', async () => {
   expect(listUsersRes.status).toBe(200);
 });
 
+test('list users returns list', async () => {
+  const [user1, userToken] = await registerUser(request(app));
+  const [user2] = await registerUser(request(app));
+  const [user3] = await registerUser(request(app));
+
+  const listUsersRes = await request(app)
+    .get('/api/user?page=1&limit=10&name=*')
+    .set('Authorization', 'Bearer ' + userToken);
+  expect(listUsersRes.status).toBe(200);
+  expect(listUsersRes.body).toHaveProperty('users');
+  expect(Array.isArray(listUsersRes.body.users)).toBe(true);
+
+  if (listUsersRes.body.users.length > 0) {
+    const user = listUsersRes.body.users[0];
+    expect(user).toHaveProperty('name');
+    expect(user).toHaveProperty('email');
+    expect(user).toHaveProperty('roles');
+  }
+});
+
 async function registerUser(service) {
   const testUser = {
     name: 'pizza diner',
