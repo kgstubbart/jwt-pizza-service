@@ -88,8 +88,6 @@ userRouter.get(
     const limit = req.query.limit ?? 10;
     const name = req.query.name ?? '*';
 
-    const offset = (page - 1) * limit;
-
     const nameFilter = name === '*' || name.trim() === '' ? null : name;
 
     const [users, more] = await DB.listUsers(page, limit, nameFilter);
