@@ -45,6 +45,11 @@ test('list users returns list', async () => {
   expect(listUsersRes.body).toHaveProperty('users');
   expect(Array.isArray(listUsersRes.body.users)).toBe(true);
 
+  expect(listUsersRes.body.users.length).toBeGreaterThanOrEqual(3);
+
+  const emails = listUsersRes.body.users.map(u => u.email);
+  expect(emails).toEqual(expect.arrayContaining([user1.email, user2.email, user3.email]));
+
   if (listUsersRes.body.users.length > 0) {
     const user = listUsersRes.body.users[0];
     expect(user).toHaveProperty('name');

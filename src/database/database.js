@@ -281,6 +281,29 @@ class DB {
     }
   }
 
+  async listUsers(page = 1, limit = 9, nameFilter = '*') {
+    const connection = await this.getConnection();
+    try {
+      const offset = this.getOffset(page, limit);
+
+      const likeFilter = (nameFilter ?? '*').toString().replace(/\*/g, '%');
+
+      let users = await this.query(connection, `SELECT id, name, email FROM user WHERE name LIKE ? ORDER BY id DESC LIMIT ${limit + 1} OFFSET ${offset}`, [likeFilter]);
+      const more = users.length > limit;
+      if (more) {
+        users = users.slice(0, limit);
+      }
+
+      for (const user of users) {
+        user.roles = await this.query(connection, `SELECT role, objectId FROM userRole WHERE userId=?`, [user.id]);
+      }
+      return [users, more];
+    } finally {
+      connection.end();
+    }
+
+  }
+
   getOffset(currentPage = 1, listPerPage) {
     return (currentPage - 1) * [listPerPage];
   }
