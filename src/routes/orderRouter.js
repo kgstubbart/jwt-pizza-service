@@ -3,6 +3,7 @@ const config = require('../config.js');
 const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
+const metrics = require('../metrics.js');
 
 const orderRouter = express.Router();
 
@@ -79,16 +80,30 @@ orderRouter.post(
   asyncHandler(async (req, res) => {
     const orderReq = req.body;
     const order = await DB.addDinerOrder(req.user, orderReq);
-    const r = await fetch(`${config.factory.url}/api/order`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
-      body: JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }),
-    });
-    const j = await r.json();
-    if (r.ok) {
-      res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
-    } else {
-      res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
+    const start = Date.now();
+    try {
+      const r = await fetch(`${config.factory.url}/api/order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
+        body: JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }),
+      });
+      const j = await r.json();
+      const latencyMs = Date.now() - start;
+
+      const quantity = req.body?.items?.length || 1;
+      const priceCents = j.total || 0;
+
+      if (r.ok) {
+        metrics.pizzaPurchase(true, latencyMs, priceCents, quantity);
+        res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
+      } else {
+        metrics.pizzaPurchase(false, latencyMs, 0, 0);
+        res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
+      }
+    } catch (err) {
+      const latencyMs = Date.now() - start;
+      metrics.pizzaPurchase(false, latencyMs, 0, 0);
+      res.status(500).send({ message: 'Pizza purchase failed' });
     }
   })
 );
