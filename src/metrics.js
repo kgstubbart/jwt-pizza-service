@@ -100,7 +100,6 @@ class Metrics {
 			console.error("Failed to get active users", err);
 		}
 
-		// Debug log active users retrieval for troubleshooting
 		try {
 			console.log("metrics: activeCount=", this.activeUsers);
 		} catch (e) {
@@ -231,22 +230,12 @@ class Metrics {
 			],
 		});
 
-		// Debug: log payload size and a short preview before sending
 		try {
 			console.log(
 				"metrics: sending payload size=",
 				Buffer.byteLength(body),
 				"bytes",
 			);
-			// log just the active_users metric entry for quick inspection
-			try {
-				const parsed = JSON.parse(body);
-				const preview =
-					parsed.resourceMetrics?.[0]?.scopeMetrics?.[0]?.metrics?.find(
-						(m) => m.name === "active_users",
-					);
-				console.log("metrics: active_users payload preview=", preview);
-			} catch (e) {}
 			try {
 				const parsed = JSON.parse(body);
 				const preview =
@@ -284,7 +273,6 @@ class Metrics {
 			body,
 		});
 
-		// Read response body once and log status + body for debugging
 		try {
 			const respText = await response.text();
 			console.log(
