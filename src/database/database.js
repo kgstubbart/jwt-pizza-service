@@ -442,3 +442,21 @@ class DB {
 
 const db = new DB();
 module.exports = { Role, DB: db };
+
+// ensure lastSeen exists on older DBs
+try {
+  const ensure = async (table, column) => {
+    const [rows] = await connection.execute(
+      `SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+      [config.db.connection.database, table, 'lastSeen']
+    );
+    if (rows[0].c === 0) {
+      await connection.query(`ALTER TABLE \`${table}\` ADD COLUMN lastSeen ${column}`);
+      console.log(`DB migration: added ${table}.lastSeen`);
+    }
+  };
+  await ensure('auth', 'DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+  await ensure('user', 'DATETIME NULL');
+} catch (e) {
+  console.error('DB migration error ensuring lastSeen columns', e);
+}
