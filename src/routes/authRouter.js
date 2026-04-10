@@ -44,6 +44,9 @@ async function setAuthUser(req, res, next) {
     } catch {
       req.user = null;
     }
+    if (req.user) {
+      await DB.touchAuthToken(token);
+    }
   }
   next();
 }
