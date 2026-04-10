@@ -101,6 +101,7 @@ orderRouter.post(
         res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
       }
     } catch (err) {
+      console.error('Factory request failed', err);
       const latencyMs = Date.now() - start;
       metrics.pizzaPurchase(false, latencyMs, 0, 0);
       res.status(500).send({ message: 'Pizza purchase failed' });
