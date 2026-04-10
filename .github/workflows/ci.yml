@@ -42,12 +42,6 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Fix schema (add lastSeen column)
-        run: |
-          mysql -h 127.0.0.1 -uroot -ptempdbpassword pizza -e "
-            ALTER TABLE user ADD COLUMN lastSeen DATETIME NULL;
-          "
-
       - name: Write config file
         run: |
           echo "module.exports = {
