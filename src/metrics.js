@@ -91,6 +91,14 @@ class Metrics {
   async sendToGrafana() {
     const metrics = [];
 
+    const { DB } = require('./database/database.js');
+    try {
+        const activeCount = await DB.getActiveUsers(5);
+        this.setActiveUsers(activeCount);
+    } catch (err) {
+        console.error('Failed to get active users', err);
+    }
+
     for (const [key, value] of this.httpCounts.entries()) {
       const [method, route, statusGroup] = key.split('|');
       metrics.push(
