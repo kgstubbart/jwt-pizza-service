@@ -1,7 +1,8 @@
 const tableCreateStatements = [
   `CREATE TABLE IF NOT EXISTS auth (
     token VARCHAR(512) PRIMARY KEY,
-    userId INT NOT NULL
+    userId INT NOT NULL,
+    lastSeen DATETIME DEFAULT CURRENT_TIMESTAMP
   )`,
 
   `CREATE TABLE IF NOT EXISTS user (

@@ -91,10 +91,10 @@ orderRouter.post(
       const latencyMs = Date.now() - start;
 
       const quantity = req.body?.items?.length || 1;
-      const priceCents = j.total || 0;
+      const price_j = j.total || 0;
 
       if (r.ok) {
-        metrics.pizzaPurchase(true, latencyMs, priceCents, quantity);
+        metrics.pizzaPurchase(true, latencyMs, price_j, quantity);
         res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
       } else {
         metrics.pizzaPurchase(false, latencyMs, 0, 0);
