@@ -103,7 +103,7 @@ class DB {
     token = this.getTokenSignature(token);
     const connection = await this.getConnection();
     try {
-      await this.query(connection, `INSERT INTO auth (token, userId) VALUES (?, ?) ON DUPLICATE KEY UPDATE token=token`, [token, userId]);
+      await this.query(connection, `INSERT INTO auth (token, userId, lastSeen) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE userId=VALUES(userId), lastSeen=NOW()`, [token, userId]);
     } finally {
       connection.end();
     }
@@ -406,6 +406,26 @@ class DB {
   async checkDatabaseExists(connection) {
     const [rows] = await connection.execute(`SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?`, [config.db.connection.database]);
     return rows.length > 0;
+  }
+
+  async touchAuthToken(token) {
+    token = this.getTokenSignature(token);
+    const connection = await this.getConnection();
+    try {
+      await this.query(connection, `UPDATE auth SET lastSeen=NOW() WHERE token=?`, [token]);
+    } finally {
+      connection.end();
+    }
+  }
+
+  async getActiveUsers(minutes=5) {
+    const connection = await this.getConnection();
+    try {
+      const rows = await this.query(connection, `SELECT COUNT(DISTINCT userId) as c FROM auth WHERE lastSeen >= DATE_SUB(NOW(), INTERVAL ? MINUTE)`, [minutes]);
+      return rows[0].c || 0;
+    } finally {
+      connection.end();
+    }
   }
 }
 
