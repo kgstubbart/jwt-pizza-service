@@ -418,11 +418,22 @@ class DB {
     }
   }
 
-  async getActiveUsers(minutes=5) {
+  async touchUserLastSeen(userId) {
     const connection = await this.getConnection();
     try {
-      const rows = await this.query(connection, `SELECT COUNT(DISTINCT userId) as c FROM auth WHERE lastSeen >= DATE_SUB(NOW(), INTERVAL ? MINUTE)`, [minutes]);
-      return rows[0].c || 0;
+      await this.query(connection, `UPDATE user SET lastSeen=NOW() WHERE id=?`, [userId]);
+    } finally {
+      connection.end();
+    }
+  }
+
+  async getActiveUsers(minutes = 5) {
+    const connection = await this.getConnection();
+    try {
+      const rows = await this.query(connection,
+        `SELECT COUNT(*) AS c FROM user WHERE lastSeen >= DATE_SUB(NOW(), INTERVAL ? MINUTE)`,
+        [minutes]);
+      return rows[0]?.c || 0;
     } finally {
       connection.end();
     }
