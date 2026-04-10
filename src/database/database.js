@@ -431,8 +431,8 @@ class DB {
     const connection = await this.getConnection();
     try {
       const rows = await this.query(connection,
-        `SELECT COUNT(*) AS c FROM user WHERE lastSeen >= DATE_SUB(NOW(), INTERVAL ? MINUTE)`,
-        [minutes]);
+      `SELECT COUNT(DISTINCT userId) AS c FROM auth WHERE lastSeen >= DATE_SUB(NOW(), INTERVAL ? MINUTE)`,
+      [minutes]);
       return rows[0]?.c || 0;
     } finally {
       connection.end();
