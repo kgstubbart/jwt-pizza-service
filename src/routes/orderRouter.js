@@ -91,8 +91,19 @@ orderRouter.post(
       const latencyMs = Date.now() - start;
 
       const quantity = req.body?.items?.length || 1;
-      const price_j = Number(j.total || 0);
-      const price_cents = Math.round(price_j * 100);
+
+      let price_cents = 0;
+      if (j && j.total != null) {
+        const p = Number(j.total);
+        if (!Number.isNaN(p)) price_cents = Math.round(p * 100);
+      }
+      if (price_cents === 0 && Array.isArray(req.body.items)) {
+        price_cents = Math.round(
+          req.body.items.reduce((sum, it) => sum + (Number(it.price || 0) * 100 * (it.quantity || 1)), 0)
+        );
+      }
+
+      console.log('orderRouter: factory response', { total: j?.total, computedCents: price_cents, quantity });
 
       if (r.ok) {
         metrics.pizzaPurchase(true, latencyMs, price_cents, quantity);
