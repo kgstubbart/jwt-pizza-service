@@ -52,6 +52,11 @@ class Metrics {
 		} else {
 			this.pizzaFailures += 1;
 		}
+
+		console.log(
+			"metrics: pizzaPurchase",
+			{ success, latencyMs, priceCents, quantity, pizzaRevenueCents: this.pizzaRevenueCents },
+		);
 	}
 
 	getCpuUsagePercentage() {
@@ -238,22 +243,23 @@ class Metrics {
 			);
 			try {
 				const parsed = JSON.parse(body);
-				const preview =
-					parsed.resourceMetrics?.[0]?.scopeMetrics?.[0]?.metrics?.find(
-						(m) => m.name === "active_users",
-					);
-				if (preview) {
-					const dp = preview.gauge?.dataPoints?.[0];
-					console.log("metrics: active_users payload preview=", {
-						name: preview.name,
-						unit: preview.unit,
-						value: dp?.asInt,
-						attributes: dp?.attributes,
-					});
+
+				// active_users preview (existing)
+				const activePreview = parsed.resourceMetrics?.[0]?.scopeMetrics?.[0]?.metrics?.find((m) => m.name === 'active_users');
+				if (activePreview) {
+					const dp = activePreview.gauge?.dataPoints?.[0];
+					console.log('metrics: active_users payload preview=', { name: activePreview.name, unit: activePreview.unit, value: dp?.asInt, attributes: dp?.attributes });
 				} else {
-					console.log(
-						"metrics: active_users metric not found in payload preview",
-					);
+					console.log('metrics: active_users metric not found in payload preview');
+				}
+
+				// pizza_revenue_cents preview (new)
+				const revenuePreview = parsed.resourceMetrics?.[0]?.scopeMetrics?.[0]?.metrics?.find((m) => m.name === 'pizza_revenue_cents');
+				if (revenuePreview) {
+					const dp = revenuePreview.sum?.dataPoints?.[0] || revenuePreview.gauge?.dataPoints?.[0];
+					console.log('metrics: pizza_revenue_cents payload preview=', { name: revenuePreview.name, unit: revenuePreview.unit, asInt: dp?.asInt, asDouble: dp?.asDouble, attributes: dp?.attributes });
+				} else {
+					console.log('metrics: pizza_revenue_cents metric not found in payload preview');
 				}
 			} catch (e) {
 				console.error("metrics: failed to parse payload preview", e);
